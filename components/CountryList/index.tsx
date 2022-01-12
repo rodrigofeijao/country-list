@@ -85,12 +85,13 @@ export default function CountryList() {
           </div>
         ))}
       </List>
-
-      <Pagination
-        count={getNumberOfPages(groupedCountries)}
-        page={page}
-        onChange={handlePaginationChange}
-      />
+      <Box display="flex" justifyContent="center">
+        <Pagination
+          count={getNumberOfPages(groupedCountries)}
+          page={page}
+          onChange={handlePaginationChange}
+        />
+      </Box>
     </Box>
   );
 }
