@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { gql, useQuery } from "@apollo/client";
 import Box from "@mui/material/Box";
 import List from "@mui/material/List";
@@ -12,6 +13,8 @@ import Link from "next/link";
 
 import { Country } from "../../types/country";
 import { FULL } from "./styles";
+import { chunk } from "lodash";
+import { Pagination } from "@mui/material";
 
 export const ALL_COUNTRIES_QUERY = gql`
   {
@@ -31,6 +34,20 @@ export default function CountryList() {
     notifyOnNetworkStatusChange: true,
   });
 
+  const [page, setPage] = useState(1);
+  const [groupedCountries, setGroupedCountries] = useState<Country[][]>([[]]);
+
+  useEffect(() => {
+    setGroupedCountries(chunk(data!.countries, 10));
+  }, [data]);
+
+  const handlePaginationChange = (
+    _event: React.ChangeEvent<unknown>,
+    value: number
+  ) => {
+    setPage(value);
+  };
+
   if (loading)
     return (
       <Box sx={FULL}>
@@ -47,16 +64,18 @@ export default function CountryList() {
       </Box>
     );
 
-  const onClick = () => {};
+  const getNumberOfPages = (countries: Country[][]): number => {
+    return countries.length;
+  };
 
   return (
     <Box sx={FULL}>
       <List>
-        {data!.countries.map((country) => (
+        {groupedCountries[page - 1].map((country) => (
           <div key={country.code}>
             <ListItem disablePadding>
               <Link href={`/country/${country.code}`} passHref>
-                <ListItemButton component="a" onClick={onClick}>
+                <ListItemButton component="a" onClick={() => null}>
                   <ListItemAvatar>{country.emoji}</ListItemAvatar>
                   <ListItemText primary={country.name} />
                 </ListItemButton>
@@ -66,6 +85,13 @@ export default function CountryList() {
           </div>
         ))}
       </List>
+      <Box display="flex" justifyContent="center">
+        <Pagination
+          count={getNumberOfPages(groupedCountries)}
+          page={page}
+          onChange={handlePaginationChange}
+        />
+      </Box>
     </Box>
   );
 }
